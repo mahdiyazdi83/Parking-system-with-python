@@ -9,6 +9,23 @@ car_controller = CarController()
 parking_controller = ParkingSessionController()
 
 
+def format_plate(plate):
+    """12ب34511 → 12 ب 345 - ایران 11"""
+    try:
+        p = str(plate).strip()
+        for i, c in enumerate(p):
+            if '\u0600' <= c <= '\u06FF':
+                digits_before = p[:i]
+                letter = p[i]
+                rest = p[i+1:]
+                digits_mid = rest[:3]
+                province = rest[3:]
+                return f"{digits_before} {letter} {digits_mid} - ایران {province}"
+        return plate
+    except:
+        return plate
+
+
 def get_active_sessions():
     sessions = parking_controller.bl.session_list
     return [s for s in sessions if s.out_time is None]
@@ -24,11 +41,13 @@ def get_spot_map():
         spots = []
         for place in range(1, 51):
             key = (floor, place)
+            raw_plate = occupied.get(key, None)
             spots.append({
                 "place": place,
                 "floor": floor,
                 "occupied": key in occupied,
-                "plate": occupied.get(key, None)
+                "plate": raw_plate,
+                "plate_display": format_plate(raw_plate) if raw_plate else None
             })
         floors.append({"floor": floor, "spots": spots})
     return floors
@@ -45,7 +64,8 @@ def index():
                            floors=floors,
                            total_spots=total_spots,
                            occupied_count=occupied_count,
-                           free_count=total_spots - occupied_count)
+                           free_count=total_spots - occupied_count,
+                           format_plate=format_plate)
 
 
 @app.route("/park", methods=["POST"])
@@ -73,7 +93,7 @@ def park():
         result = parking_controller.park_car(car, spot)
         if "Error" in result:
             return jsonify({"success": False, "message": result})
-        return jsonify({"success": True, "message": f"خودرو {plate} پارک شد"})
+        return jsonify({"success": True, "message": f"خودرو {format_plate(plate)} پارک شد"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
 
@@ -90,7 +110,12 @@ def exit_car():
         return jsonify({"success": False, "message": result})
 
     cost = result.replace("COST : ", "").replace("$", "")
-    return jsonify({"success": True, "message": f"خودرو {plate} خارج شد", "cost": cost})
+    return jsonify({
+        "success": True,
+        "message": f"خودرو {format_plate(plate)} خارج شد",
+        "cost": cost,
+        "plate_display": format_plate(plate)
+    })
 
 
 @app.route("/api/spots")

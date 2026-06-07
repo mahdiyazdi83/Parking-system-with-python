@@ -152,15 +152,14 @@
   }
   .plate-widget:focus-within { border-color:var(--accent); }
 
-  /* کد استان — سمت چپ با بک‌گراند آبی مثل پلاک واقعی */
   .plate-province {
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    background:#003580; padding:6px 10px; min-width:46px;
+    background:#003580; padding:6px 10px; min-width:55px;
     border-left:1px solid #002060;
   }
   .plate-province input {
     background:transparent; border:none; color:#fff;
-    width:34px; text-align:center; font-size:.95rem; font-weight:700;
+    width:50px; text-align:center; font-size:.95rem; font-weight:700;
     outline:none; font-family:var(--font-body);
   }
   .plate-province input::placeholder { color:rgba(255,255,255,0.4); }
@@ -168,12 +167,10 @@
     font-size:.45rem; color:rgba(255,255,255,0.6); letter-spacing:1px; margin-top:2px;
   }
 
-  /* جداکننده */
   .plate-div {
     width:1px; background:var(--border); flex-shrink:0;
   }
 
-  /* بخش اصلی پلاک */
   .plate-main {
     display:flex; align-items:center; flex:1; padding:0 8px; gap:4px;
   }
@@ -187,9 +184,9 @@
   .plate-dash {
     color:var(--muted); font-size:.85rem; flex-shrink:0;
   }
-  #p1 { width:36px; }
-  #p2 { width:52px; }
-  #p3 { width:44px; }
+  #p1 { width:45px; }
+  #p2 { width:65px; }
+  #p3 { width:55px; }
 
   .plate-hint {
     font-size:.65rem; color:var(--muted); margin-top:5px; letter-spacing:.5px;
@@ -330,7 +327,7 @@
     pointer-events:none;
     z-index:1000;
     display:none;
-    min-width:140px;
+    min-width:180px;
   }
   .tooltip.show { display:block; }
   .tooltip .t-plate { font-family:var(--font-head); color:var(--accent); font-size:1rem; }
@@ -383,7 +380,7 @@
 
 <div class="main">
 
-  <!-- ═══ RIGHT PANEL ═══ -->
+  <!-- ═══ LEFT PANEL ═══ -->
   <div class="left-panel">
     <div class="tab-bar">
       <button class="tab active" onclick="switchTab('park')">ثبت و پارک</button>
@@ -396,7 +393,6 @@
       <div class="form-group">
         <label>پلاک خودرو</label>
         <div class="plate-widget">
-          <!-- بخش اصلی: ۲رقم - حرف - ۳رقم -->
           <div class="plate-main">
             <input id="p1" maxlength="2" placeholder="12"
                    oninput="this.value=this.value.replace(/\D/g,'');if(this.value.length==2)document.getElementById('p2').focus()">
@@ -409,7 +405,6 @@
                    oninput="this.value=this.value.replace(/\D/g,'');if(this.value.length==3)document.getElementById('p4').focus()">
           </div>
           <div class="plate-div"></div>
-          <!-- کد استان: سمت چپ با بک‌گراند آبی -->
           <div class="plate-province">
             <input id="p4" maxlength="2" placeholder="11"
                    oninput="this.value=this.value.replace(/\D/g,'')">
@@ -453,7 +448,8 @@
         {% for s in active_sessions %}
         <div class="session-card">
           <div>
-            <div class="session-plate">{{ s.car.plate }}</div>
+            {# نمایش پلاک با فرمت خوانا، دکمه خروج پلاک خام رو میگیره #}
+            <div class="session-plate">{{ format_plate(s.car.plate) }}</div>
             <div class="session-meta">طبقه {{ s.spot.floor }} — جای {{ s.spot.place }} &nbsp;|&nbsp; {{ s.car.model }}</div>
           </div>
           <button class="exit-btn" onclick="exitCar('{{ s.car.plate }}')">خروج</button>
@@ -465,7 +461,7 @@
     </div>
   </div>
 
-  <!-- LEFT PANEL: MAP -->
+  <!-- RIGHT PANEL: MAP -->
   <div class="right-panel">
     <div class="map-header">
       <div class="map-title">نقشه جاهای پارک</div>
@@ -485,6 +481,7 @@
                data-floor="{{ spot.floor }}"
                data-place="{{ spot.place }}"
                data-plate="{{ spot.plate or '' }}"
+               data-plate-display="{{ spot.plate_display or '' }}"
                onmouseenter="showTip(event, this)"
                onmouseleave="hideTip()"
                onclick="spotClick(this)">
@@ -508,6 +505,24 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // ── FORMAT PLATE (JS version, همون منطق Python) ──
+  function formatPlate(raw) {
+    if (!raw) return '';
+    // پیدا کردن اولین حرف فارسی
+    for (let i = 0; i < raw.length; i++) {
+      const code = raw.charCodeAt(i);
+      if (code >= 0x0600 && code <= 0x06FF) {
+        const before = raw.slice(0, i);       // 12
+        const letter = raw[i];                // ب
+        const rest   = raw.slice(i + 1);      // 34511
+        const mid    = rest.slice(0, 3);      // 345
+        const prov   = rest.slice(3);         // 11
+        return `${before} ${letter} ${mid} - ایران ${prov}`;
+      }
+    }
+    return raw; // اگر فرمت ناشناخته بود، خام برگردون
+  }
+
   // ── TABS ──
   function switchTab(name) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -524,14 +539,14 @@
     setTimeout(() => el.className = 'toast', 3000);
   }
 
-  // ── TOOLTIP ──
+  // ── TOOLTIP: از data-plate-display استفاده میکنه ──
   const tip = document.getElementById('tooltip');
   function showTip(e, el) {
-    const floor = el.dataset.floor;
-    const place = el.dataset.place;
-    const plate = el.dataset.plate;
-    document.getElementById('t-plate').textContent = plate || '— آزاد —';
-    document.getElementById('t-info').textContent = `طبقه ${floor}  |  جای ${place}`;
+    const floor        = el.dataset.floor;
+    const place        = el.dataset.place;
+    const plateDisplay = el.dataset.plateDisplay || el.dataset.plate;
+    document.getElementById('t-plate').textContent = plateDisplay || '— آزاد —';
+    document.getElementById('t-info').textContent  = `طبقه ${floor}  |  جای ${place}`;
     tip.classList.add('show');
     moveTip(e);
   }
@@ -547,41 +562,39 @@
     if (el.classList.contains('occ')) return;
     document.getElementById('floor').value = el.dataset.floor;
     document.getElementById('place').value = el.dataset.place;
-    // switch to park tab
     document.querySelectorAll('.tab')[0].click();
   }
 
   // ── PARK CAR ──
   async function parkCar() {
-    const p1 = document.getElementById('p1').value.trim();  // ۲ رقم اول
-    const p2 = document.getElementById('p2').value.trim();  // حرف
-    const p3 = document.getElementById('p3').value.trim();  // ۳ رقم وسط
-    const p4 = document.getElementById('p4').value.trim();  // کد استان
+    const p1 = document.getElementById('p1').value.trim();
+    const p2 = document.getElementById('p2').value.trim();
+    const p3 = document.getElementById('p3').value.trim();
+    const p4 = document.getElementById('p4').value.trim();
 
     if (!p1 || p1.length !== 2) { toast('۲ رقم اول پلاک را وارد کنید', 'error'); return; }
     if (!p2)                     { toast('حرف پلاک را انتخاب کنید', 'error'); return; }
     if (!p3 || p3.length !== 3)  { toast('۳ رقم وسط پلاک را وارد کنید', 'error'); return; }
     if (!p4 || p4.length !== 2)  { toast('کد استان (۲ رقم) را وارد کنید', 'error'); return; }
 
-    // فرمت استاندارد: 12ب34511  (بدون فاصله، برای ذخیره‌سازی)
-    const plate = p1 + p2 + p3 + p4;
+    const plate = p1 + p2 + p3 + p4; // خام برای ذخیره‌سازی
 
     const payload = {
-      plate, 
+      plate,
       model:  document.getElementById('model').value.trim(),
       mobile: document.getElementById('mobile').value.trim(),
       floor:  document.getElementById('floor').value,
       place:  document.getElementById('place').value,
     };
 
-    const res = await fetch('/park', {
+    const res  = await fetch('/park', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify(payload)
     });
     const data = await res.json();
 
     if (data.success) {
-      toast(data.message, 'success');
+      toast(data.message, 'success'); // سرور پلاک فرمت‌شده رو برمیگردونه
       document.getElementById('p1').value='';
       document.getElementById('p3').value='';
       document.getElementById('p4').value='';
@@ -594,14 +607,15 @@
   }
 
   // ── EXIT CAR ──
-  async function exitCar(plate) {
-    const res = await fetch('/exit', {
+  async function exitCar(plate) { // plate خام میگیره
+    const res  = await fetch('/exit', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({plate})
     });
     const data = await res.json();
     if (data.success) {
-      toast(`${plate} خارج شد — هزینه: ${data.cost}$`, 'success');
+      // سرور plate_display فرمت‌شده برمیگردونه
+      toast(`${data.plate_display} خارج شد — هزینه: ${data.cost}$`, 'success');
       refreshAll();
     } else {
       toast(data.message, 'error');
@@ -610,21 +624,24 @@
 
   // ── REFRESH ──
   async function refreshAll() {
-    // update stats
-    const s = await fetch('/api/status').then(r=>r.json());
+    // آمار header
+    const s = await fetch('/api/status').then(r => r.json());
     document.getElementById('h-free').textContent = s.free;
     document.getElementById('h-occ').textContent  = s.occupied;
 
-    // update spot map
-    const floors = await fetch('/api/spots').then(r=>r.json());
-    const mapEl = document.getElementById('spot-map');
+    // نقشه جاها — از plate_display که سرور میده استفاده میکنه
+    const floors = await fetch('/api/spots').then(r => r.json());
+    const mapEl  = document.getElementById('spot-map');
     mapEl.innerHTML = floors.map(fd => `
       <div class="floor-block">
         <div class="floor-label">طبقه ${fd.floor}</div>
         <div class="spots-grid">
           ${fd.spots.map(sp => `
             <div class="spot ${sp.occupied ? 'occ' : 'free'}"
-                 data-floor="${sp.floor}" data-place="${sp.place}" data-plate="${sp.plate || ''}"
+                 data-floor="${sp.floor}"
+                 data-place="${sp.place}"
+                 data-plate="${sp.plate || ''}"
+                 data-plate-display="${sp.plate_display || ''}"
                  onmouseenter="showTip(event,this)" onmouseleave="hideTip()" onclick="spotClick(this)">
               <span class="spot-num">${sp.place}</span>
             </div>
@@ -633,10 +650,10 @@
       </div>
     `).join('');
 
-    // update sessions list
-    const res2 = await fetch('/').then(r=>r.text());
+    // لیست session ها — بازسازی با فرمت JS
+    const res2 = await fetch('/').then(r => r.text());
     const parser = new DOMParser();
-    const doc = parser.parseFromString(res2, 'text/html');
+    const doc    = parser.parseFromString(res2, 'text/html');
     document.getElementById('sessions-list').innerHTML =
       doc.getElementById('sessions-list').innerHTML;
   }
