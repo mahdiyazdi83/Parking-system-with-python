@@ -152,6 +152,55 @@
   }
   .plate-widget:focus-within { border-color:var(--accent); }
 
+  .plate-input-row {
+    display:grid;
+    grid-template-columns: 1fr 44px;
+    gap:8px;
+    align-items:stretch;
+  }
+
+  .plate-upload-btn {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--border);
+    background:var(--panel);
+    color:var(--accent);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .plate-upload-btn:hover,
+  .plate-upload-btn.loading {
+    border-color:var(--accent);
+    background:var(--surface);
+  }
+  .plate-upload-btn:disabled {
+    cursor:wait;
+    opacity:.85;
+  }
+  .plate-upload-btn svg {
+    width:18px;
+    height:18px;
+    stroke:currentColor;
+  }
+  .plate-upload-btn.loading .upload-icon {
+    display:none;
+  }
+  .plate-upload-btn:not(.loading) .upload-spinner {
+    display:none;
+  }
+  .upload-spinner {
+    width:18px;
+    height:18px;
+    border:2px solid rgba(245,166,35,.25);
+    border-top-color:var(--accent);
+    border-radius:50%;
+    animation: spin .8s linear infinite;
+  }
+  .plate-upload-input {
+    display:none;
+  }
+
   .plate-province {
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     background:#003580; padding:6px 10px; min-width:55px;
@@ -352,6 +401,10 @@
     to   { opacity:1; transform:translateY(0); }
   }
 
+  @keyframes spin {
+    to { transform:rotate(360deg); }
+  }
+
   /* ─── SCROLLBAR ─── */
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
@@ -392,24 +445,37 @@
 
       <div class="form-group">
         <label>پلاک خودرو</label>
-        <div class="plate-widget">
-          <div class="plate-main">
-            <input id="p1" maxlength="2" placeholder="12"
-                   oninput="this.value=this.value.replace(/\D/g,'');if(this.value.length==2)document.getElementById('p2').focus()">
-            <select id="p2" onchange="document.getElementById('p3').focus()">
-              {% for l in ['ب','ج','د','س','ص','ط','ق','ل','م','ن','و','ه','ی','الف','پ','ت','ث','ح','خ','ذ','ر','ز','ژ','ش','ض','ع','غ','ف','ک'] %}
-              <option>{{ l }}</option>
-              {% endfor %}
-            </select>
-            <input id="p3" maxlength="3" placeholder="345"
-                   oninput="this.value=this.value.replace(/\D/g,'');if(this.value.length==3)document.getElementById('p4').focus()">
+        <div class="plate-input-row">
+          <div class="plate-widget">
+            <div class="plate-main">
+              <input id="p1" maxlength="2" placeholder="12"
+                     oninput="this.value=this.value.replace(/\D/g,'');if(this.value.length==2)document.getElementById('p2').focus()">
+              <select id="p2" onchange="document.getElementById('p3').focus()">
+                {% for l in ['ب','ج','د','س','ص','ط','ق','ل','م','ن','و','ه','ی','الف','پ','ت','ث','ح','خ','ذ','ر','ز','ژ','ش','ض','ع','غ','ف','ک'] %}
+                <option>{{ l }}</option>
+                {% endfor %}
+              </select>
+              <input id="p3" maxlength="3" placeholder="345"
+                     oninput="this.value=this.value.replace(/\D/g,'');if(this.value.length==3)document.getElementById('p4').focus()">
+            </div>
+            <div class="plate-div"></div>
+            <div class="plate-province">
+              <input id="p4" maxlength="2" placeholder="11"
+                     oninput="this.value=this.value.replace(/\D/g,'')">
+              <div class="plate-province-label">ایران</div>
+            </div>
           </div>
-          <div class="plate-div"></div>
-          <div class="plate-province">
-            <input id="p4" maxlength="2" placeholder="11"
-                   oninput="this.value=this.value.replace(/\D/g,'')">
-            <div class="plate-province-label">ایران</div>
-          </div>
+          <button class="plate-upload-btn" id="plate-upload-btn" type="button"
+                  title="خواندن پلاک از تصویر" aria-label="خواندن پلاک از تصویر"
+                  onclick="document.getElementById('plate-image-input').click()">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <path d="M17 8l-5-5-5 5"></path>
+              <path d="M12 3v12"></path>
+            </svg>
+            <span class="upload-spinner" aria-hidden="true"></span>
+          </button>
+          <input class="plate-upload-input" id="plate-image-input" type="file" accept="image/*" onchange="readPlateFromImage(this)">
         </div>
         <div class="plate-hint">مثال: ۱۲ ب ۳۴۵ — ایران ۱۱</div>
       </div>
@@ -603,6 +669,49 @@
       refreshAll();
     } else {
       toast(data.message, 'error');
+    }
+  }
+
+  // ── READ PLATE IMAGE ──
+  async function readPlateFromImage(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const btn = document.getElementById('plate-upload-btn');
+    const formData = new FormData();
+    formData.append('image', file);
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/read-plate', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      if (!data.success || !data.parts) {
+        toast(data.message || 'پلاک از تصویر خوانده نشد', 'error');
+        return;
+      }
+
+      document.getElementById('p1').value = data.parts.p1 || '';
+      document.getElementById('p2').value = data.parts.p2 || '';
+      document.getElementById('p3').value = data.parts.p3 || '';
+      document.getElementById('p4').value = data.parts.p4 || '';
+
+      if (data.needs_manual_review) {
+        toast('پلاک خوانده شد؛ لطفا قبل از ثبت بررسی کنید', 'error');
+      } else {
+        toast('پلاک خوانده شد؛ قبل از ثبت بررسی کنید', 'success');
+      }
+    } catch (err) {
+      toast('خطا در خواندن تصویر پلاک', 'error');
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      input.value = '';
     }
   }
 

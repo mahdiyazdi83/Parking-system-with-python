@@ -1,9 +1,12 @@
 from flask import Flask, render_template, request, jsonify
 from controller.car_controller import CarController
 from controller.parking_session_controller import ParkingSessionController
+from features.plate_recognition import read_plate_from_upload
 from model.entity.park_spot import ParkSpot
+from tools.logger_system import Logger
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
 
 car_controller = CarController()
 parking_controller = ParkingSessionController()
@@ -132,6 +135,45 @@ def api_status():
         "free": total - len(active),
         "total": total
     })
+
+
+@app.route("/api/read-plate", methods=["POST"])
+def api_read_plate():
+    image = request.files.get("image")
+
+    if not image:
+        return jsonify({
+            "success": False,
+            "message": "تصویری ارسال نشده است",
+            "needs_manual_review": True
+        }), 400
+
+    if image.mimetype and not image.mimetype.startswith("image/"):
+        return jsonify({
+            "success": False,
+            "message": "فایل ارسال شده تصویر نیست",
+            "needs_manual_review": True
+        }), 400
+
+    try:
+        Logger.info(
+            f"Plate image sent for analysis: filename={image.filename or 'unknown'}, "
+            f"content_type={image.mimetype or 'unknown'}"
+        )
+        result = read_plate_from_upload(image)
+        return jsonify(result)
+    except ModuleNotFoundError as e:
+        return jsonify({
+            "success": False,
+            "message": f"وابستگی OCR نصب نیست: {e.name}",
+            "needs_manual_review": True
+        }), 500
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e),
+            "needs_manual_review": True
+        }), 500
 
 
 if __name__ == "__main__":

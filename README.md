@@ -1,66 +1,127 @@
-# 🅿️ Smart Parking System with Python
+# Smart Parking System with Python
 
-A modern, full-featured web-based parking management system built with Python and Flask.
+A web-based parking management system built with Python and Flask. It provides an
+RTL Persian dashboard for parking cars, exiting cars, viewing live parking spot
+status, and optionally filling the plate fields from a car image using local OCR.
 
+## Features
 
-## ✨ Features
+- Large capacity parking map: 8 floors with 50 parking spots each
+- RTL Persian web interface
+- Interactive live parking spot grid
+- Vehicle entry and exit workflow
+- Automatic parking cost calculation on exit
+- Local file-based storage with `car.dat` and `parking_session.dat`
+- Operation logs in `loglist.log`
+- Optional plate OCR helper using OpenCV and EasyOCR
 
-- **Large Capacity**: 8 floors with 50 parking spots each (Total 400 spots)
-- **Modern Web Interface**: Beautiful dark theme with full RTL (Persian) support
-- **Interactive Parking Map**: Real-time visual grid showing occupied and free spots
-- **Smart Entry/Exit**: Automatic cost calculation when vehicles exit
-- **Vehicle Management**: Store car details (plate number, model, phone number)
-- **Live Dashboard**: Real-time statistics (free spots, occupied, total)
-- **Persistent Storage**: Data saved in local files (`car.dat`, `parking_session.dat`)
-- **Professional Logging**: All operations logged in `loglist.log`
+## Plate OCR Helper
 
-## 🛠️ Technologies
+The OCR feature is intentionally designed as a manual-review helper:
 
-- **Backend**: Python + Flask
-- **Frontend**: HTML5, CSS3, JavaScript (Vazirmatn + Bebas Neue fonts)
-- **Architecture**: MVC (Model-View-Controller)
-- **Data Storage**: File-based (Pickle serialization)
+1. The user uploads a car image from the plate input area.
+2. The backend analyzes the image locally with OpenCV and EasyOCR.
+3. The detected plate parts are inserted into the UI fields.
+4. The user reviews/corrects the fields manually.
+5. The user clicks the normal park button.
 
-## 🚀 Quick Start
+The OCR endpoint does not save cars, park cars, or modify data files directly.
+It only returns detected plate text to the frontend.
 
-### Prerequisites
-- Python 3.8 or higher
+## Technologies
 
-### Installation
+- Python
+- Flask
+- HTML, CSS, JavaScript
+- OpenCV
+- EasyOCR
+- PyTorch
+- File-based persistence
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/mahdiyazdi83/Parking-system-with-python.git
-   cd Parking-system-with-python
+## Installation
 
-Install dependencies:Bashpip install flask
-Run the application:Bashpython app.py
-[Open your browser and go to:texthttp://127.0.0.1:5000](http://127.0.0.1:5000)
+### Windows
 
-📁 Project Structure
+Run:
+
+```bat
+install.bat
+```
+
+### Linux/macOS
+
+Run:
+
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+The installer scripts install the required Python packages one by one.
+
+## Running The App
+
+```bash
+python app.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5000
+```
+
+## GPU Notes
+
+The OCR module currently loads EasyOCR in CPU mode for compatibility:
+
+```python
+easyocr.Reader(["fa", "en"], gpu=False)
+```
+
+To use GPU, install a CUDA-enabled PyTorch build, then change `gpu=False` to
+`gpu=True` in `features/plate_recognition/reader.py`.
+
+You can check CUDA availability with:
+
+```bash
+python -c "import torch; print(torch.cuda.is_available())"
+```
+
+## Project Structure
+
+```text
 Parking-system-with-python/
-├── app.py                    # Main Flask application
-├── controller/               # Business logic controllers
-├── model/                    # Data models (Car, ParkingSpot, ...)
-├── templates/                # HTML templates
-├── tools/                    # Helper utilities
-├── car.dat                   # Vehicle database
-├── parking_session.dat       # Active parking sessions
-└── loglist.log               # Application logs
-🎯 How to Use
+├── app.py
+├── controller/
+├── features/
+│   └── plate_recognition/
+├── model/
+├── templates/
+├── tools/
+├── install.bat
+├── install.sh
+├── car.dat
+├── parking_session.dat
+└── loglist.log
+```
 
-Park a Vehicle: Enter plate number, car model, phone number, and select a spot
-Exit Vehicle: Enter plate number → cost is calculated automatically
-Live Map: Visually monitor all parking spots in real-time
+## Usage
 
-📌 Notes
+- Park a vehicle: enter plate, model, mobile number, floor, and parking spot.
+- Read plate from image: click the upload icon beside the plate field, then
+  review the detected result before submitting.
+- Exit a vehicle: choose an active car and calculate the exit cost.
+- Monitor spots: use the live parking grid to see occupied and free locations.
 
-This project is under active development
-Data is stored locally in files (not suitable for production environments yet)
-Fully responsive and optimized for desktop use
+## Notes
 
-👨‍💻 Author
+- This project is for learning and demonstration.
+- Data is stored locally in files, so it is not production-grade storage.
+- OCR accuracy depends on image quality, plate angle, lighting, and crop quality.
+
+## Author
+
 Mahdi Yazdi
-Published: June 2026
 
-⭐ If you found this project useful, please give it a star!
+Published: June 2026
