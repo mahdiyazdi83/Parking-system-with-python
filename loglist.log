@@ -4,3 +4,56 @@
 2026-06-07 13:21:47,105 -  INFO -  * Restarting with stat
 2026-06-07 13:21:47,479 - WARNING -  * Debugger is active!
 2026-06-07 13:21:47,485 -  INFO -  * Debugger PIN: 439-469-593
+2026-06-18 11:03:59,263 -  INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-06-18 11:03:59,263 -  INFO - [33mPress CTRL+C to quit[0m
+2026-06-18 11:03:59,265 -  INFO -  * Restarting with stat
+2026-06-18 11:03:59,714 - WARNING -  * Debugger is active!
+2026-06-18 11:03:59,720 -  INFO -  * Debugger PIN: 130-070-197
+2026-06-18 11:04:04,036 -  INFO - 127.0.0.1 - - [18/Jun/2026 11:04:04] "GET / HTTP/1.1" 200 -
+2026-06-18 11:04:04,848 -  INFO - 127.0.0.1 - - [18/Jun/2026 11:04:04] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-06-18 16:21:09,627 -  INFO -  * Detected change in 'C:\\Users\\mahdi\\OneDrive\\Desktop\\pythone course\\projects\\Parking-system-with-python\\app.py', reloading
+2026-06-18 16:21:09,736 -  INFO -  * Restarting with stat
+2026-06-18 16:32:47,417 -  INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-06-18 16:32:47,417 -  INFO - [33mPress CTRL+C to quit[0m
+2026-06-18 16:32:47,420 -  INFO -  * Restarting with stat
+2026-06-18 16:32:47,997 - WARNING -  * Debugger is active!
+2026-06-18 16:32:48,008 -  INFO -  * Debugger PIN: 130-070-197
+2026-06-18 16:32:58,706 -  INFO - 127.0.0.1 - - [18/Jun/2026 16:32:58] "GET / HTTP/1.1" 200 -
+2026-06-18 16:34:49,731 -  INFO - 127.0.0.1 - - [18/Jun/2026 16:34:49] "[35m[1mPOST /api/read-plate HTTP/1.1[0m" 500 -
+2026-06-18 16:46:45,812 -  INFO -  * Detected change in 'C:\\Users\\mahdi\\OneDrive\\Desktop\\pythone course\\.venv\\Lib\\site-packages\\cv2\\__init__.py', reloading
+2026-06-18 16:46:45,957 -  INFO -  * Restarting with stat
+2026-06-18 16:46:46,988 - WARNING -  * Debugger is active!
+2026-06-18 16:46:47,003 -  INFO -  * Debugger PIN: 130-070-197
+2026-06-18 17:32:59,273 -  INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-06-18 17:32:59,273 -  INFO - [33mPress CTRL+C to quit[0m
+2026-06-18 17:32:59,276 -  INFO -  * Restarting with stat
+2026-06-18 17:33:00,101 - WARNING -  * Debugger is active!
+2026-06-18 17:33:00,114 -  INFO -  * Debugger PIN: 571-034-279
+2026-06-18 17:33:42,041 - WARNING - Using CPU. Note: This module is much faster with a GPU.
+2026-06-18 17:35:30,855 -  INFO - 127.0.0.1 - - [18/Jun/2026 17:35:30] "POST /api/read-plate HTTP/1.1" 200 -
+2026-06-18 18:01:06,316 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:01:06] "POST /api/read-plate HTTP/1.1" 200 -
+2026-06-18 18:07:29,514 -  INFO -  * Detected change in 'C:\\Users\\mahdi\\OneDrive\\Desktop\\pythone course\\projects\\Parking-system-with-python\\app.py', reloading
+2026-06-18 18:07:30,573 -  INFO -  * Restarting with stat
+2026-06-18 18:07:31,407 - WARNING -  * Debugger is active!
+2026-06-18 18:07:31,417 -  INFO -  * Debugger PIN: 571-034-279
+2026-06-18 18:08:29,309 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:08:29] "GET / HTTP/1.1" 200 -
+2026-06-18 18:08:38,255 -  INFO - Plate image sent for analysis: filename=test4.jpg, content_type=image/jpeg
+2026-06-18 18:08:45,703 - WARNING - Using CPU. Note: This module is much faster with a GPU.
+2026-06-18 18:09:40,046 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:09:40] "POST /api/read-plate HTTP/1.1" 200 -
+2026-06-18 18:12:23,825 -  INFO - Plate image sent for analysis: filename=test2.jpg, content_type=image/jpeg
+2026-06-18 18:12:47,146 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:12:47] "POST /api/read-plate HTTP/1.1" 200 -
+2026-06-18 18:14:38,479 -  INFO - Plate image sent for analysis: filename=test3.jpg, content_type=image/jpeg
+2026-06-18 18:15:31,741 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:15:31] "POST /api/read-plate HTTP/1.1" 200 -
+2026-06-18 18:19:05,034 -  INFO - Plate image sent for analysis: filename=test5.jpg, content_type=image/jpeg
+2026-06-18 18:20:21,866 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:20:21] "POST /api/read-plate HTTP/1.1" 200 -
+2026-06-18 18:20:49,924 -  INFO - Plate image sent for analysis: filename=file.jpg, content_type=image/jpeg
+2026-06-18 18:22:12,283 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:22:12] "POST /api/read-plate HTTP/1.1" 200 -
+2026-06-18 18:27:49,361 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:27:49] "GET / HTTP/1.1" 200 -
+2026-06-18 18:28:13,180 -  INFO - Car 14ص44445 parked successfully
+2026-06-18 18:28:13,180 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:28:13] "POST /park HTTP/1.1" 200 -
+2026-06-18 18:28:13,187 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:28:13] "GET /api/status HTTP/1.1" 200 -
+2026-06-18 18:28:13,204 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:28:13] "GET /api/spots HTTP/1.1" 200 -
+2026-06-18 18:28:13,219 -  INFO - 127.0.0.1 - - [18/Jun/2026 18:28:13] "GET / HTTP/1.1" 200 -
